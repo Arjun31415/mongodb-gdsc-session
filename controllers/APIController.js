@@ -19,9 +19,9 @@ class APIController {
 
   createTodo = (req, res) => {
     const { text } = req.body;
-    const todo = { id: this.todos.length + 1, text };
+    const todo = new Todo(text, new Date(), "0");
     this.todos.push(todo);
-    res.json(todo);
+    res.json(this.getTodosJSON());
   };
 
   deleteTodoById = (req, res) => {

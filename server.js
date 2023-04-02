@@ -58,6 +58,7 @@ MainRoutes.get("/error", mainController.error);
 // *********************************
 APIRoutes.get("/", apiController.example); //"/api"
 APIRoutes.get("/todos", apiController.getAllTodos);
+APIRoutes.post("/todos", apiController.createTodo);
 
 // *********************************
 // Server Listener
