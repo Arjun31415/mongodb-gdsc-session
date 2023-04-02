@@ -1,0 +1,28 @@
+<%- include("partials/head.ejs") %>
+
+<%- include("partials/header.ejs") %>
+<body>
+<main>
+    <h1>ToDo </h1>
+ <% console.log("in ejs",todos) %> 
+    
+<% if (todos && todos.length > 0) { %>
+  <ul>
+    <% todos.forEach(todo => { %>
+      <li><%= todo.text %></li>
+    <% }); %>
+  </ul>
+<% } else { %>
+  <p>No todos found.</p>
+<% } %>
+
+<form action="/todos" method="POST">
+  <input type="text" name="text" placeholder="Add a new todo">
+  <button type="submit">Add</button>
+</form>
+
+<script src="/static/js/script.js"></script>
+</main>
+
+</body>
+<%- include("partials/footer.ejs") %>
