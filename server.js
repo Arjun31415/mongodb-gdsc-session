@@ -13,24 +13,8 @@ import cors from "cors";
 import morgan from "morgan";
 import MainController from "./controllers/MainController.js";
 import APIController from "./controllers/APIController.js";
-import { MongoClient } from 'mongodb';
-import assert from 'assert';
+import { MongoClient, ServerApiVersion } from "mongodb";
 
-
-// *********************************
-// MongoDB Variable Declarations
-// *********************************
-
-
-// Connection URL
-const url = 'mongodb://localhost:27017';
-
-// Database Name
-const dbName = 'todo';
-
-
-// Create a new MongoClient
-const client = new MongoClient(url);
 
 // *********************************
 // Global Variables & Controller Instantiation
@@ -66,45 +50,53 @@ app.use("/api", APIRoutes);
 APIRoutes.use(cors());
 
 // *********************************
-// Routes that Render Pages with EJS
+// Connect to MongoDB Atlas
 // *********************************
-MainRoutes.get("/", mainController.index)// "/"
-MainRoutes.get("/error", mainController.error);
+// const MongoClient = mongodb.MongoClient;
+// const mongoURI = process.env.MONGO_URI;
+const mongoURI = "mongodb+srv://admin:gdscwebdev123@main.aw34pqu.mongodb.net/?retryWrites=true&w=majority";
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(mongoURI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+  
 
-// *********************************
-// API Routes that Return JSON
-// *********************************
-APIRoutes.get("/", apiController.example); //"/api"
-APIRoutes.get("/todos", apiController.getAllTodos);
-APIRoutes.post("/todos", apiController.createTodo);
+client.connect((err) => {
+  if (err) {
+    console.error("Failed to connect to MongoDB Atlas:", err);
+    process.exit(1);
+  }
 
-app.get("/", (req, res) => {
-    // Get the documents collection
-    const db = client.db(dbName);
-    const collection = db.collection('documents');
-    // Find some documents
-    collection.find({}).toArray(function (err, todos) {
-        assert.equal(err, null);
-        res.render('index', { todos: todos })
-    });
+  console.log("Connected to MongoDB Atlas");
+
+  // *********************************
+  // Routes that Render Pages with EJS
+  // *********************************
+  MainRoutes.get("/", mainController.index)// "/"
+  MainRoutes.get("/error", mainController.error);
+
+  // *********************************
+  // API Routes that Return JSON
+  // *********************************
+  const db = client.db(process.env.MONGO_DB || "mydb");
+
+  APIRoutes.get("/", apiController.example); //"/api"
+  APIRoutes.get("/todos", async (req, res) => {
+    const todos = await db.collection("todos").find().toArray();
+    res.json(todos);
+  });
+  APIRoutes.post("/todos", async (req, res) => {
+    const todo = req.body;
+    await db.collection("todos").insertOne(todo);
+    res.json(todo);
+  });
+
+  // *********************************
+  // Server Listener
+  // *********************************
+  app.listen(PORT, () => console.log(`👂Listening on Port ${PORT}👂`));
 });
-
-// *********************************
-// MongoDB Server Connection
-// *********************************
-
-// Use connect method to connect to the Server
-client.connect(function (err) {
-    assert.equal(null, err);
-
-    // *********************************
-    // Server Listener
-    // *********************************
-    app.listen(PORT, () => console.log(`👂Listening on Port ${PORT}👂`));
-
-    console.log("Connected successfully to database server");
-
-});
-
-
-
