@@ -1,20 +1,19 @@
-// *********************************
-// Enabling Enviromental Variables
-// *********************************
+import APIController from "./controllers/APIController.js";
+import MainController from "./controllers/MainController.js";
+import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config();
-
 // *********************************
 // Import Dependencies
 // *********************************
 import express from "express";
 import methodOverride from "method-override";
-import cors from "cors";
 import morgan from "morgan";
-import MainController from "./controllers/MainController.js";
-import APIController from "./controllers/APIController.js";
-import { MongoClient, ServerApiVersion } from "mongodb";
+// *********************************
+// Enabling Enviromental Variables
+// *********************************
 
+
+dotenv.config();
 
 // *********************************
 // Global Variables & Controller Instantiation
@@ -52,26 +51,7 @@ APIRoutes.use(cors());
 // *********************************
 // Connect to MongoDB Atlas
 // *********************************
-// const MongoClient = mongodb.MongoClient;
-// const mongoURI = process.env.MONGO_URI;
-const mongoURI = "mongodb+srv://admin:gdscwebdev123@main.aw34pqu.mongodb.net/?retryWrites=true&w=majority";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(mongoURI, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    }
-  });
-  
-
-client.connect((err) => {
-  if (err) {
-    console.error("Failed to connect to MongoDB Atlas:", err);
-    process.exit(1);
-  }
-
-  console.log("Connected to MongoDB Atlas");
 
   // *********************************
   // Routes that Render Pages with EJS
@@ -82,21 +62,12 @@ client.connect((err) => {
   // *********************************
   // API Routes that Return JSON
   // *********************************
-  const db = client.db(process.env.MONGO_DB || "mydb");
 
   APIRoutes.get("/", apiController.example); //"/api"
-  APIRoutes.get("/todos", async (req, res) => {
-    const todos = await db.collection("todos").find().toArray();
-    res.json(todos);
-  });
-  APIRoutes.post("/todos", async (req, res) => {
-    const todo = req.body;
-    await db.collection("todos").insertOne(todo);
-    res.json(todo);
-  });
+  APIRoutes.get("/todos", apiController.getAllTodos);
+  APIRoutes.post("/todos", apiController.postTodo);
 
   // *********************************
   // Server Listener
   // *********************************
   app.listen(PORT, () => console.log(`👂Listening on Port ${PORT}👂`));
-});
